@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive To-Do List (Professional)</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Icon for location -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<style>
+:root {
+    --primary-gradient: linear-gradient(135deg, #22223B, #4A4E69);
+    --secondary-gradient: linear-gradient(135deg, #9A8C98, #C9ADA7);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --shadow-color: rgba(0, 0, 0, 0.25);
+    --todo-pending: #9A8C98;
+    --todo-completed: #4A4E69;
+    --btn-secondary: #9A8C98;
+    --btn-secondary-hover: #4A4E69;
+    --error-color: #D9534F;
+    --success-color: #5cb85c;
+}
+
+/* Basic Reset */
+* {margin:0; padding:0; box-sizing:border-box;}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #22223B, #4A4E69);
+    min-height:100vh;
+    color: #F2E9E4;
+}
+
+.container {
+    max-width: 1200px;
+    margin:0 auto;
+    padding:20px;
+}
+
+/* ---------- Header ---------- */
+header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px 30px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border-radius:20px;
+    margin-bottom:20px;
+    box-shadow:0 10px 25px var(--shadow-color);
+}
+header .logo {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:700;
+    font-size:1.5em;
+    color:#F2E9E4;
+}
+header .logo img {
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #F2E9E4;
+}
+
+/* ---------- Footer ---------- */
+footer {
+    margin-top:40px;
+    padding:20px;
+    text-align:center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border-radius:20px;
+    box-shadow:0 10px 25px var(--shadow-color);
+    font-size:0.9em;
+    color:#F2E9E4;
+}
+
+/* Navigation */
+nav {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 15px 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.nav-list { display:flex; justify-content:center; list-style:none; gap:30px; flex-wrap:wrap; }
+.nav-item { padding:12px 28px; border-radius:30px; cursor:pointer; transition: all 0.3s ease; font-weight:600; color:#F2E9E4; letter-spacing:1px;}
+.nav-item:hover, .nav-item.active { background: var(--secondary-gradient); color: #22223B; }
+
+/* Page Content */
+.page {
+    display:none;
+    background: rgba(242, 233, 228, 0.9);
+    border-radius: 25px;
+    padding:50px;
+    box-shadow: 0 20px 40px var(--shadow-color);
+    backdrop-filter: blur(15px);
+    animation: fadeIn 0.5s ease-in-out;
+    color: #22223B;
+}
+
+.page.active { display:block; }
+
+@keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+
+h1, h2 { color:#4A4E69; margin-bottom:20px; text-align:center; }
+h1 { font-size:2.5em; background: var(--primary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+/* Hero */
+.hero { text-align:center; margin-bottom:40px; }
+.hero p { font-size:1.2em; color:#4A4E69; margin-bottom:30px; }
+
+/* Features */
+.features { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap:25px; margin-top:40px; }
+.feature-card { background: var(--secondary-gradient); color:#22223B; padding:30px; border-radius:20px; text-align:center; transition:transform 0.3s ease, box-shadow 0.3s ease;}
+.feature-card:hover { transform: translateY(-10px); box-shadow:0 10px 25px var(--shadow-color); }
+
+/* To-Do */
+.todo-container { max-width:800px; margin:0 auto; }
+.todo-input-section { 
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+/* Grid for buttons */
+.todo-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.todo-input { width:100%; padding:15px; border:2px solid #9A8C98; border-radius:10px; font-size:16px; transition:border-color 0.3s ease; }
+.todo-input:focus { outline:none; border-color:#4A4E69; }
+
+.btn { padding:15px 25px; border:none; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:1px; font-size: 0.9em;}
+.btn-primary { background: var(--primary-gradient); color:#F2E9E4; }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(74,78,105,0.4);}
+.btn-danger { background: #C9ADA7; color:#22223B; }
+.btn-secondary { background: var(--btn-secondary); color:#F2E9E4; }
+.btn-secondary:hover { background: var(--btn-secondary-hover); transform:translateY(-2px); box-shadow:0 5px 15px rgba(74,78,105,0.4); }
+
+.filter-section { display:flex; justify-content:center; gap:15px; margin-bottom:30px; flex-wrap:wrap; }
+.filter-btn { padding:10px 20px; border:2px solid #4A4E69; background:transparent; color:#4A4E69; border-radius:25px; cursor:pointer; transition: all 0.3s ease;}
+.filter-btn.active, .filter-btn:hover { background:#4A4E69; color:#F2E9E4; }
+
+.todo-list { list-style:none; }
+.todo-item { display:flex; align-items:center; justify-content:space-between; padding:20px; margin-bottom:15px; background:#F2E9E4; border-radius:10px; border-left:6px solid var(--todo-pending); transition:all 0.3s ease; color:#22223B;}
+.todo-item.completed { opacity:0.85; border-left-color: var(--todo-completed);}
+.todo-text { flex:1; font-size:16px; margin-right:15px; word-break: break-word; }
+.todo-location { font-size: 0.85em; color: #4A4E69; margin-top: 5px; display: block;}
+.todo-location a { color: #22223B; text-decoration: none; font-weight: 500; }
+.todo-location a:hover { text-decoration: underline; }
+
+.todo-actions { display:flex; gap:10px; flex-shrink: 0; }
+.btn-small { padding:8px 12px; font-size:12px; border-radius:8px; font-weight:500; transition: all 0.3s ease; }
+.btn-small:hover { transform:translateY(-2px); }
+
+/* Progress Bar */
+.progress-container { background:#C9ADA7; border-radius:10px; overflow:hidden; margin-bottom:20px; height:25px;}
+.progress-fill { height:100%; width:0%; text-align:center; color:#F2E9E4; font-weight:600; line-height:25px; background:#4A4E69; transition: width 0.3s ease, background 0.3s ease; }
+
+/* Chart */
+.chart-container { width:100%; max-width:400px; margin:0 auto 30px; }
+
+/* Contact Form & Register Form */
+.contact-form, .register-form { max-width:600px; margin:0 auto; }
+.form-group { margin-bottom:25px; }
+.form-group label { display:block; margin-bottom:8px; font-weight:600; color:#4A4E69; }
+.form-group input, .form-group textarea { width:100%; padding:12px; border:2px solid #9A8C98; border-radius:8px; font-size:16px; transition:border-color 0.3s ease; }
+.form-group input:focus, .form-group textarea:focus { outline:none; border-color:#4A4E69; }
+.error-message { color: var(--error-color); font-size: 0.9em; margin-top: 5px; }
+.success-message { color: var(--success-color); font-size: 0.9em; margin-top: 5px; }
+
+/* Custom Modal (for alert/confirm) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+.modal-content {
+    background: #F2E9E4;
+    color: #22223B;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    max-width: 90%;
+    width: 400px;
+    text-align: center;
+    animation: zoomIn 0.3s ease;
+}
+@keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-message {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap; /* Allow buttons to wrap */
+}
+.modal-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.modal-btn-primary { background: var(--primary-gradient); color: #F2E9E4; }
+.modal-btn-primary:hover { transform: translateY(-2px); }
+.modal-btn-secondary { background: #C9ADA7; color: #22223B; }
+.modal-btn-secondary:hover { transform: translateY(-2px); }
+
+/* New Suggestion Modal Styles */
+#suggestionModal .modal-content {
+    min-height: 200px;
+}
+#suggestionTitle {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+.suggestion-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    text-align: left;
+}
+.suggestion-item {
+    background: rgba(154, 140, 152, 0.2);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+.suggestion-item:hover {
+    background: var(--secondary-gradient);
+    color: #22223B;
+}
+/* Loading Spinner */
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #FFF;
+    border-bottom-color: var(--todo-completed);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin: 20px auto;
+}
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media(max-width:768px) {
+    .todo-input-section { flex-direction:column;}
+    .todo-input, .btn { width:100%; }
+    .todo-actions { flex-direction:column; width: 80px; }
+    .page { padding: 30px 20px; }
+    .nav-list { gap: 10px; }
+    .nav-item { padding: 10px 15px; font-size: 0.9em;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- Header -->
+    <header>
+        <div class="logo">
+            <img src="https://img.icons8.com/color/96/todo-list.png" alt="Logo">
+            Interactive To-Do
+        </div>
+    </header>
+    <!-- Navigation -->
+    <nav>
+        <ul class="nav-list">
+            <li class="nav-item active" data-page="home">Home</li>
+            <li class="nav-item" data-page="todo">To-Do List</li>
+            <li class="nav-item" data-page="explore">Explore JS</li>
+            <li class="nav-item" data-page="contact">Contact</li>
+            <li class="nav-item" data-page="register">Register</li>
+        </ul>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <div class="hero">
+            <h1>Interactive To-Do List</h1>
+            <p>A professional web app demonstrating enhanced JS concepts and modern UI.</p>
+        </div>
+        <div class="features">
+            <div class="feature-card"><h3>Enhanced To-Do List</h3><p>Add, delete, complete tasks, filter, and save with MySQL.</p></div>
+            <div class="feature-card"><h3>JavaScript Concepts</h3><p>Explore data types, operators, loops, conditionals, and functions interactively.</p></div>
+            <div class="feature-card"><h3>Location Suggestions</h3><p>AI-powered place suggestions for your tasks (e.g., "coffee" suggests cafes).</p></div>
+            <div class="feature-card"><h3>Geolocation API</h3><p>Tag your tasks like 'Workout' or 'Grocery Run' with your current location.</p></div>
+            <div class="feature-card"><h3>History API</h3><p>Seamless page navigation using the browser's history (back/forward buttons).</p></div>
+            <div class="feature-card"><h3>Form Validation</h3><p>Check out the new Register page with real-time, client-side form validation.</p></div>
+        </div>
+    </div>
+
+    <!-- To-Do Page -->
+    <div id="todo" class="page">
+        <h1>My To-Do List</h1>
+        <div class="todo-container">
+            <div class="todo-input-section">
+                <input type="text" id="taskInput" class="todo-input" placeholder="Enter a new task...">
+                <div class="todo-buttons-grid">
+                    <button id="addTaskBtn" class="btn btn-primary">Add Task</button>
+                    <!-- New Geolocation Button -->
+                    <button id="addTaskWithLocationBtn" class="btn btn-secondary">
+                        <i class="fas fa-map-marker-alt"></i> Add with Location
+                    </button>
+                    <button id="clearTasksBtn" class="btn btn-danger">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div id="progressFill" class="progress-fill">0%</div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container">
+                <canvas id="taskChart" width="400" height="400"></canvas>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+
+            <ul id="todoList" class="todo-list"></ul>
+        </div>
+    </div>
+
+    <!-- Explore JS Page -->
+    <div id="explore" class="page">
+        <h1>JavaScript Concepts Explorer</h1>
+        <div class="features">
+            <div class="feature-card">
+                <h3>Data Types & Operators</h3>
+                <p>Interactive demo for primitives, objects, arrays, functions, arithmetic, logical and comparison operators.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures" target="_blank" style="color:#22223B; font-weight:600; text-decoration:underline;">Learn More →</a>
+            </div>
+            <div class="feature-card">
+                <h3>Loops & Conditionals</h3>
+                <p>Try for, while, do-while loops and if-else, switch-case statements.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Loops_and_iteration" target="_blank" style="color:#22223B; font-weight:600; text-decoration:underline;">Learn More →</a>
+            </div>
+            <div class="feature-card">
+                <h3>Functions</h3>
+                <p>Call functions, pass parameters, return results, explore ES6 arrow functions.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" target="_blank" style="color:#22223B; font-weight:600; text-decoration:underline;">Learn More →</a>
+            </div>
+            <div class="feature-card">
+                <h3>Math & Algorithms</h3>
+                <p>Factorial, Fibonacci, GCD, and other simple algorithm demonstrations.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math" target="_blank" style="color:#22223B; font-weight:600; text-decoration:underline;">Learn More →</a>
+            </div>
+            <!-- New Card 1 -->
+            <div class="feature-card">
+                <h3>Objects & Prototypes</h3>
+                <p>Understand objects, inheritance, prototypes, and how JavaScript handles OOP concepts.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects" target="_blank" style="color:#22223B; font-weight:600; text-decoration:underline;">Learn More →</a>
+            </div>
+            <!-- New Card 2 -->
+            <div class="feature-card">
+                <h3>Asynchronous JS</h3>
+                <p>Dive into callbacks, promises, async/await, and how JavaScript handles concurrency.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous" target="_blank" style="color:#22223B; font-weight:600; text-decoration:underline;">Learn More →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Page -->
+    <div id="contact" class="page">
+        <h1>Contact Us</h1>
+        <div class="contact-form">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Your Name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Your Email">
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" rows="5" placeholder="Your Message"></textarea>
+            </div>
+            <button class="btn btn-primary" id="sendMessageBtn">Send Message</button>
+        </div>
+    </div>
+    
+    <!-- New Register Page -->
+    <div id="register" class="page">
+        <h1>Create Account</h1>
+        <form class="register-form" id="registerForm" novalidate>
+            <div class="form-group">
+                <label for="reg-username">Username</label>
+                <input type="text" id="reg-username" placeholder="At least 5 characters">
+                <div class="error-message" id="username-error" style="display: none;"></div>
+            </div>
+            <div class="form-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" placeholder="Enter a valid email">
+                <div class="error-message" id="email-error" style="display: none;"></div>
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" placeholder="At least 8 characters">
+                <div class="error-message" id="password-error" style="display: none;"></div>
+            </div>
+            <div class="form-group">
+                <label for="reg-confirm-password">Confirm Password</label>
+                <input type="password" id="reg-confirm-password" placeholder="Repeat your password">
+                <div class="error-message" id="confirm-password-error" style="display: none;"></div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="registerBtn">Register</button>
+            <div id="register-status" style="margin-top: 15px;"></div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        © 2025 Interactive To-Do List | Designed By Shravni..!! ❤
+    </footer>
+</div>
+
+<!-- Custom Modal HTML -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-content">
+        <p id="modalMessage" class="modal-message">This is a message.</p>
+        <div class="modal-buttons">
+            <button id="modalBtnOk" class="modal-btn modal-btn-primary">OK</button>
+            <button id="modalBtnCancel" class="modal-btn modal-btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- New Suggestion Modal HTML -->
+<div id="suggestionModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="suggestionTitle">Looking for suggestions...</h3>
+        
+        <!-- Loading Spinner -->
+        <div id="suggestionLoader" class="loader" style="display: none;"></div>
+        
+        <!-- Suggestion List -->
+        <ul id="suggestionList" class="suggestion-list">
+            <!-- Suggestions will be added here by JS -->
+        </ul>
+        
+        <!-- Error Message -->
+        <div id="suggestionError" class="error-message" style="display: none;"></div>
+        
+        <div class="modal-buttons">
+            <button id="modalBtnUseCurrent" class="modal-btn modal-btn-secondary">Use Current Location</button>
+            <button id="modalBtnCancelSuggest" class="modal-btn modal-btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// === Database Configuration ===
+const API_BASE_URL = window.location.origin + '/todo-app/api';
+
+// === Custom Modal System (Replaces alert/confirm) ===
+const customModal = document.getElementById('customModal');
+const modalMessage = document.getElementById('modalMessage');
+const modalBtnOk = document.getElementById('modalBtnOk');
+const modalBtnCancel = document.getElementById('modalBtnCancel');
+
+let confirmCallback = null;
+
+// Shows a simple alert-style modal
+function showCustomAlert(message) {
+    modalMessage.textContent = message;
+    modalBtnOk.style.display = 'inline-block';
+    modalBtnCancel.style.display = 'none';
+    customModal.style.display = 'flex';
+
+    // Using .onclick to easily override previous listeners
+    modalBtnOk.onclick = () => {
+        customModal.style.display = 'none';
+    };
+}
+
+// Shows a confirm-style modal with a callback
+function showCustomConfirm(message, callback) {
+    modalMessage.textContent = message;
+    modalBtnOk.style.display = 'inline-block';
+    modalBtnCancel.style.display = 'inline-block';
+    customModal.style.display = 'flex';
+    confirmCallback = callback;
+
+    modalBtnOk.onclick = () => {
+        customModal.style.display = 'none';
+        if (confirmCallback) confirmCallback(true);
+    };
+    
+    modalBtnCancel.onclick = () => {
+        customModal.style.display = 'none';
+        if (confirmCallback) confirmCallback(false);
+    };
+}
+
+// === New Suggestion Modal ===
+const suggestionModal = document.getElementById('suggestionModal');
+const suggestionTitle = document.getElementById('suggestionTitle');
+const suggestionList = document.getElementById('suggestionList');
+const suggestionLoader = document.getElementById('suggestionLoader');
+const suggestionError = document.getElementById('suggestionError');
+const modalBtnUseCurrent = document.getElementById('modalBtnUseCurrent');
+const modalBtnCancelSuggest = document.getElementById('modalBtnCancelSuggest');
+
+modalBtnCancelSuggest.onclick = () => {
+    suggestionModal.style.display = 'none';
+};
+
+// === Navigation & History API ===
+const navItems = document.querySelectorAll('.nav-item');
+const pages = document.querySelectorAll('.page');
+
+function navigateTo(pageId, pushState = true) {
+    // Update nav items
+    navItems.forEach(nav => {
+        if (nav.dataset.page === pageId) {
+            nav.classList.add('active');
+        } else {
+            nav.classList.remove('active');
+        }
+    });
+
+    // Update pages
+    pages.forEach(page => {
+        if (page.id === pageId) {
+            page.classList.add('active');
+        } else {
+            page.classList.remove('active');
+        }
+    });
+
+    // Update history
+    if (pushState) {
+        history.pushState({ page: pageId }, '', #${pageId});
+    }
+}
+
+// Nav item click listener
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        const pageId = e.currentTarget.dataset.page;
+        navigateTo(pageId);
+    });
+});
+
+// Browser back/forward listener
+window.addEventListener('popstate', (e) => {
+    let pageId = 'home'; // Default
+    if (e.state && e.state.page) {
+        pageId = e.state.page;
+    } else if (location.hash) {
+        pageId = location.hash.substring(1); // Get page from hash
+    }
+    navigateTo(pageId, false); // false = don't push new state
+});
+
+// === To-Do List ===
+let tasks = [];
+let currentFilter = 'all';
+
+// Chart
+let taskChart;
+function initializeChart() {
+    const ctx = document.getElementById('taskChart')?.getContext('2d');
+    if (ctx) {
+        taskChart = new Chart(ctx, {
+            type:'doughnut',
+            data:{
+                labels:['Completed','Pending'],
+                datasets:[{
+                    data:[0,0],
+                    backgroundColor:['#4A4E69','#9A8C98'],
+                    hoverOffset:8
+                }]
+            },
+            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+        });
+    }
+}
+
+// API Functions for MySQL
+async function apiCall(endpoint, method = 'GET', data = null) {
+    try {
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+
+        if (data) {
+            options.body = JSON.stringify(data);
+        }
+
+        const response = await fetch(${API_BASE_URL}/${endpoint}, options);
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error || 'API request failed');
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
+
+// Load tasks from MySQL
+async function loadTasks() {
+    try {
+        const result = await apiCall('tasks.php');
+        tasks = result.data || [];
+        displayTasks();
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+        // Fallback to localStorage
+        tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        displayTasks();
+    }
+}
+
+// Save task to MySQL
+async function saveTask(task) {
+    try {
+        const result = await apiCall('tasks.php', 'POST', task);
+        return result.data;
+    } catch (error) {
+        console.error('Error saving task:', error);
+        // Fallback to localStorage
+        task.id = Date.now();
+        tasks.push(task);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        return task;
+    }
+}
+
+// Update task in MySQL
+async function updateTask(id, updates) {
+    try {
+        const result = await apiCall(tasks.php?id=${id}, 'PUT', updates);
+        return result.data;
+    } catch (error) {
+        console.error('Error updating task:', error);
+        // Fallback to localStorage
+        tasks = tasks.map(t => t.id === id ? { ...t, ...updates } : t);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        return tasks.find(t => t.id === id);
+    }
+}
+
+// Delete task from MySQL
+async function deleteTaskFromDB(id) {
+    try {
+        await apiCall(tasks.php?id=${id}, 'DELETE');
+        return true;
+    } catch (error) {
+        console.error('Error deleting task:', error);
+        // Fallback to localStorage
+        tasks = tasks.filter(t => t.id !== id);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        return true;
+    }
+}
+
+// Clear all tasks from MySQL
+async function clearAllTasks() {
+    try {
+        await apiCall('tasks.php', 'DELETE');
+        return true;
+    } catch (error) {
+        console.error('Error clearing tasks:', error);
+        // Fallback to localStorage
+        tasks = [];
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        return true;
+    }
+}
+
+// Update progress + chart
+function updateProgressAndChart() {
+    const total = tasks.length;
+    const completed = tasks.filter(t=>t.completed).length;
+    const percent = total === 0 ? 0 : Math.round((completed/total)*100);
+
+    // Progress bar
+    const fill = document.getElementById('progressFill');
+    if (fill) {
+        fill.style.width = percent+'%';
+        fill.textContent = percent+'%';
+        fill.style.background = 'linear-gradient(90deg,#22223B,#4A4E69)';
+    }
+
+    // Chart
+    if (taskChart) {
+        taskChart.data.datasets[0].data = [completed, Math.max(0,total-completed)];
+        taskChart.update();
+    }
+}
+
+// Display tasks
+function displayTasks() {
+    const todoList = document.getElementById('todoList');
+    if (!todoList) return;
+    
+    todoList.innerHTML = '';
+    const filtered = tasks.filter(task=>{
+        if(currentFilter==='completed') return task.completed;
+        if(currentFilter==='pending') return !task.completed;
+        return true;
+    });
+
+    if(filtered.length===0){
+        const empty = document.createElement('li');
+        empty.className='todo-item';
+        empty.style.justifyContent='center';
+        empty.innerHTML='<em>No tasks to show</em>';
+        todoList.appendChild(empty);
+    } else {
+        filtered.forEach(task=>{
+            const li=document.createElement('li');
+            li.className=todo-item ${task.completed?'completed':''};
+            
+            const left = document.createElement('div');
+            left.style.display='flex'; left.style.flexDirection='column'; left.style.flex='1';
+            
+            const span=document.createElement('span'); 
+            span.className='todo-text'; 
+            span.textContent=task.text; 
+            left.appendChild(span);
+            
+            // Display location if it exists
+            if (task.location_data) {
+                const location = JSON.parse(task.location_data);
+                const locText = document.createElement('small');
+                locText.className = 'todo-location';
+                
+                if (location.lat && location.lon) {
+                    // Format for current location (lat/lon)
+                    locText.innerHTML = 📍 <a href="https://www.google.com/maps?q=${location.lat},${location.lon}" target="_blank">View Location (Lat: ${location.lat.toFixed(3)}, Lon: ${location.lon.toFixed(3)})</a>;
+                } else if (location.name && location.uri) {
+                    // Format for suggested place (name/uri)
+                    locText.innerHTML = 📍 <a href="${location.uri}" target="_blank">${location.name}</a>;
+                } else if (location.name) {
+                    // Fallback for just a name
+                    locText.innerHTML = 📍 ${location.name};
+                }
+                left.appendChild(locText);
+            }
+
+            const small=document.createElement('small'); 
+            small.textContent = Added: ${new Date(task.created_at).toLocaleString()};
+            small.style.fontSize = '0.8em';
+            small.style.color = '#666';
+            small.style.marginTop = '5px';
+            left.appendChild(small);
+
+            const actions=document.createElement('div'); actions.className='todo-actions';
+            
+            const completeBtn=document.createElement('button'); completeBtn.className='btn-small';
+            completeBtn.style.background = task.completed ? '#C9ADA7' : '#4A4E69';
+            completeBtn.style.color = '#F2E9E4'; completeBtn.textContent = task.completed?'Undo':'Complete';
+            completeBtn.onclick = ()=>toggleTask(task.id);
+            
+            const deleteBtn=document.createElement('button'); deleteBtn.className='btn-small';
+            deleteBtn.style.background='#9A8C98'; deleteBtn.style.color='#F2E9E4'; deleteBtn.textContent='Delete';
+            deleteBtn.onclick = ()=>deleteTask(task.id);
+            
+            actions.appendChild(completeBtn); actions.appendChild(deleteBtn);
+            li.appendChild(left); li.appendChild(actions); todoList.appendChild(li);
+        });
+    }
+
+    updateProgressAndChart();
+}
+
+// CRUD
+async function addTask(text, location = null) {
+    const taskText = text || document.getElementById('taskInput')?.value.trim();
+    if(!taskText) {
+        showCustomAlert('Please enter a task!');
+        return;
+    }
+    
+    const newTask = {
+        text: taskText, 
+        completed: false,
+        location_data: location ? JSON.stringify(location) : null
+    };
+    
+    const savedTask = await saveTask(newTask);
+    tasks.unshift(savedTask);
+    
+    const taskInput = document.getElementById('taskInput');
+    if (taskInput) taskInput.value = '';
+    
+    displayTasks();
+}
+
+async function toggleTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    
+    const updatedTask = await updateTask(id, { completed: !task.completed });
+    tasks = tasks.map(t => t.id === id ? updatedTask : t);
+    displayTasks();
+}
+
+async function deleteTask(id) {
+    await deleteTaskFromDB(id);
+    tasks = tasks.filter(t => t.id !== id);
+    displayTasks();
+}
+
+// Event Bindings for To-Do Page
+function setupTodoEventListeners() {
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const taskInput = document.getElementById('taskInput');
+    const addTaskWithLocationBtn = document.getElementById('addTaskWithLocationBtn');
+    const clearTasksBtn = document.getElementById('clearTasksBtn');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => addTask(null, null));
+    }
+    
+    if (taskInput) {
+        taskInput.addEventListener('keypress', e=>{if(e.key==='Enter') addTask(null, null);});
+    }
+     if (addTaskWithLocationBtn) {
+        addTaskWithLocationBtn.addEventListener('click', () => {
+            const text = document.getElementById('taskInput')?.value.trim();
+            if (!text) {
+                showCustomAlert('Please enter a task text first!');
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                showCustomAlert('Geolocation is not supported by your browser.');
+                return;
+            }
+
+            // Show loading in button
+            addTaskWithLocationBtn.disabled = true;
+            addTaskWithLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // SUCCESS
+                    const location = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    };
+                    // Immediately add the task with lat/lon
+                    addTask(text, location); 
+                    
+                    addTaskWithLocationBtn.disabled = false;
+                    addTaskWithLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Add with Location';
+                },
+                (error) => {
+                    // ERROR
+                    addTaskWithLocationBtn.disabled = false;
+                    addTaskWithLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Add with Location';
+                    showCustomAlert(Unable to retrieve location. Error: ${error.message});
+                }
+            );
+        });
+    }
+    
+    if (clearTasksBtn) {
+        clearTasksBtn.addEventListener('click', ()=>{
+            showCustomConfirm('Are you sure you want to clear all tasks?', async (result) => {
+                if (result) {
+                    await clearAllTasks();
+                    tasks = [];
+                    displayTasks();
+                }
+            });
+        });
+    }
+    
+    if (filterBtns.length > 0) {
+        filterBtns.forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter=btn.dataset.filter;
+                displayTasks();
+            });
+        });
+    }
+}
+
+// Function to fetch location suggestions from Gemini API
+async function fetchLocationSuggestions(taskText, lat, lon) {
+    // 1. Setup and show modal
+    suggestionTitle.textContent = Suggestions for "${taskText}";
+    suggestionList.innerHTML = ''; // Clear old results
+    suggestionError.style.display = 'none';
+    suggestionLoader.style.display = 'block';
+    suggestionModal.style.display = 'flex';
+
+    // 2. Define API details
+    const apiKey = ""; // Leave empty, as per instructions
+    const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey};
+
+    // *** UPDATED SYSTEM PROMPT ***
+    // Stricter instructions for the model
+    const systemPrompt = You are a local guide assistant. Find 3-5 specific, real-world places near (lat: ${lat}, lon: ${lon}) for the task: "${taskText}". Respond with *only* a valid JSON array string. Your entire response must be a JSON array. Do not include \\`\json or any other text. Example: '[{"name": "Starbucks", "uri": "https://maps.google.com/..."}]'. If no places are found, return '[]'.;
+
+    const userQuery = Task: "${taskText}", Location: (lat: ${lat}, lon: ${lon});
+    
+    // 3. Construct Payload (Simplified)
+    const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: {
+            parts: [{ text: systemPrompt }]
+        },
+        tools: [{ "google_search": {} }] // Enable Google Search grounding
+    };
+
+    // 4. Fetch with Retry Logic
+    let response;
+    let retries = 3;
+    let delay = 1000;
+    let success = false;
+
+    while (retries > 0 && !success) {
+        try {
+            response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                success = true; // Exit loop
+            } else if (response.status === 429 || response.status >= 500) {
+                // Throttling or server error, wait and retry
+                retries--;
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                } else {
+                    // All retries failed
+                    throw new Error(Server error after retries: ${response.status});
+                }
+            } else {
+                // Client-side error (400, 401, 403, 404, etc.), don't retry
+                const errorText = await response.text();
+                console.error("Client error:", response.status, errorText);
+                throw new Error(Client error: ${response.status}. Check payload or API key. Details: ${errorText});
+            }
+        } catch (error) {
+            // This catches network errors (failed to fetch) OR errors thrown above
+            
+            // Check if it's a client error we just threw
+            if (error.message.startsWith("Client error")) {
+                suggestionError.textContent = "Could not fetch suggestions (Bad Request). Please try again.";
+                suggestionError.style.display = 'block';
+                suggestionLoader.style.display = 'none';
+                return; // Exit function completely
+            }
+            
+            // It's a network error or server error after retries
+            retries--;
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            } else {
+                // All retries for network/server error failed
+                console.error("Fetch failed after all retries:", error);
+                suggestionError.textContent = Network error. Could not fetch suggestions.;
+                suggestionError.style.display = 'block';
+                suggestionLoader.style.display = 'none';
+                return; // Exit function
+            }
+        }
+    }
+
+    // 5. Process Response (*** NEW, MORE ROBUST PARSING ***)
+    try {
+        const result = await response.json();
+        
+        if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+            let textResponse = result.candidates[0].content.parts[0].text;
+            let jsonText = null;
+            let suggestions;
+
+            // Try to find JSON within markdown first
+            const markdownMatch = textResponse.match(/(json)?\s*([\s\S]*?)\s*/);
+            if (markdownMatch && markdownMatch[2]) {
+                jsonText = markdownMatch[2];
+            } else {
+                // If no markdown, find the first '[' and last ']'
+                const firstBracket = textResponse.indexOf('[');
+                const lastBracket = textResponse.lastIndexOf(']');
+                if (firstBracket !== -1 && lastBracket > firstBracket) {
+                    jsonText = textResponse.substring(firstBracket, lastBracket + 1);
+                } else {
+                    // If no array found, just use the whole text and let it try to parse
+                    jsonText = textResponse;
+                }
+            }
+
+            // Now, try to parse the extracted text
+            try {
+                suggestions = JSON.parse(jsonText);
+            } catch (parseError) {
+                console.error("Failed to parse extracted JSON:", parseError, "Original text:", textResponse, "Extracted text:", jsonText);
+                throw new Error("API response was not valid JSON.");
+            }
+
+            // --- We now have valid suggestions ---
+            
+            suggestionLoader.style.display = 'none';
+
+            if (Array.isArray(suggestions) && suggestions.length > 0) {
+                // Populate suggestion list
+                suggestions.forEach(suggestion => {
+                    // Add a check for valid suggestion structure
+                    if (suggestion.name && suggestion.uri) {
+                        const li = document.createElement('li');
+                        li.className = 'suggestion-item';
+                        li.textContent = suggestion.name;
+                        li.onclick = () => {
+                            addTask(taskText, { name: suggestion.name, uri: suggestion.uri });
+                            suggestionModal.style.display = 'none';
+                        };
+                        suggestionList.appendChild(li);
+                    } else {
+                        console.warn("Skipping malformed suggestion:", suggestion);
+                    }
+                });
+
+                // Check if any suggestions were actually added
+                if (suggestionList.children.length === 0) {
+                    suggestionError.textContent = "Found suggestions, but they were in an invalid format.";
+                    suggestionError.style.display = 'block';
+                }
+
+            } else {
+                suggestionError.textContent = "No specific suggestions found nearby.";
+                suggestionError.style.display = 'block';
+            }
+
+            // Set up "Use Current Location" button
+            modalBtnUseCurrent.onclick = () => {
+                addTask(taskText, { lat, lon });
+                suggestionModal.style.display = 'none';
+            };
+
+        } else {
+            throw new Error("Invalid response structure from API.");
+        }
+    } catch (error) {
+        console.error("Error processing API response:", error);
+        suggestionLoader.style.display = 'none';
+        // Provide a more helpful error
+        if (error.message.includes("JSON")) {
+            suggestionError.textContent = "Could not parse suggestions. The format was invalid.";
+        } else {
+            suggestionError.textContent = "Could not process suggestions. Try a different task.";
+        }
+        suggestionError.style.display = 'block';
+    }
+}
+
+// Contact Form
+const sendMessageBtn = document.getElementById('sendMessageBtn');
+if (sendMessageBtn) {
+    sendMessageBtn.addEventListener('click', ()=>{
+        const name=document.getElementById('name').value.trim();
+        const email=document.getElementById('email').value.trim();
+        const msg=document.getElementById('message').value.trim();
+        if(!name||!email||!msg) {
+            showCustomAlert('Please fill in all fields!');
+            return;
+        }
+        showCustomAlert(Thank you, ${name}! Your message has been sent.);
+        document.getElementById('name').value=''; document.getElementById('email').value=''; document.getElementById('message').value='';
+    });
+}
+
+// === Register Form Validation ===
+const registerForm = document.getElementById('registerForm');
+if (registerForm) {
+    const username = document.getElementById('reg-username');
+    const email = document.getElementById('reg-email');
+    const password = document.getElementById('reg-password');
+    const confirmPassword = document.getElementById('reg-confirm-password');
+    const registerStatus = document.getElementById('register-status');
+
+    // Error display functions
+    function showError(inputEl, errorElId, message) {
+        const errorEl = document.getElementById(errorElId);
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        inputEl.style.borderColor = 'var(--error-color)';
+    }
+    function clearError(inputEl, errorElId) {
+        const errorEl = document.getElementById(errorElId);
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
+        inputEl.style.borderColor = '#9A8C98';
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    // Register user with MySQL
+    async function registerUser(userData) {
+        try {
+            const result = await apiCall('register.php', 'POST', userData);
+            return { success: true, data: result.data };
+        } catch (error) {
+            console.error('Error registering user:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Stop form submission
+        let isValid = true;
+
+        // Validate Username
+        if (username.value.trim().length < 5) {
+            showError(username, 'username-error', 'Username must be at least 5 characters long.');
+            isValid = false;
+        } else {
+            clearError(username, 'username-error');
+        }
+
+        // Validate Email
+        if (!validateEmail(email.value.trim())) {
+            showError(email, 'email-error', 'Please enter a valid email address.');
+            isValid = false;
+        } else {
+            clearError(email, 'email-error');
+        }
+
+        // Validate Password
+        if (password.value.trim().length < 8) {
+            showError(password, 'password-error', 'Password must be at least 8 characters long.');
+            isValid = false;
+        } else {
+            clearError(password, 'password-error');
+        }
+
+        // Validate Confirm Password
+        if (password.value.trim() !== confirmPassword.value.trim() || confirmPassword.value.trim() === '') {
+            showError(confirmPassword, 'confirm-password-error', 'Passwords do not match.');
+            isValid = false;
+        } else {
+            clearError(confirmPassword, 'confirm-password-error');
+        }
+
+        if (isValid) {
+            // Show loading state
+            registerStatus.innerHTML = '<div class="loader" style="width: 20px; height: 20px;"></div> Registering...';
+            registerStatus.className = '';
+            
+            const userData = {
+                username: username.value.trim(),
+                email: email.value.trim(),
+                password: password.value.trim()
+            };
+            
+            const result = await registerUser(userData);
+            
+            if (result.success) {
+                registerStatus.innerHTML = '<div class="success-message">Registration successful! You can now log in.</div>';
+                registerForm.reset();
+            } else {
+                registerStatus.innerHTML = <div class="error-message">Registration failed: ${result.error}</div>;
+            }
+        }
+    });
+}
+
+// === Initial Page Load ===
+function initializeApp() {
+    let initialPage = 'home';
+    if (location.hash) {
+        const hashPage = location.hash.substring(1);
+        // Check if page exists
+        if (document.getElementById(hashPage)) {
+            initialPage = hashPage;
+        }
+    }
+    navigateTo(initialPage, false); // Don't push state on load
+    
+    // Initialize chart and event listeners
+    initializeChart();
+    setupTodoEventListeners();
+    
+    // Only load tasks if we're on the todo page
+    if (initialPage === 'todo') {
+        loadTasks();
+    }
+}
+
+// Run initialization on load
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+</script>
+
+</body>
+</html>
